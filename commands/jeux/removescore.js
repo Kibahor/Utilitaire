@@ -15,20 +15,12 @@ module.exports = {
     const {blue}=require('../../config.json');
 
 //Si d'autres commandes necessitent perm admin vérifier directement dans event message
-    if(!message.member.hasPermission('ADMINISTRATOR')){
-      return message.channel.send(custom_embed.ToEmbedWarning("Vous n'avez pas la permissions d'utiliser cette commande !"));
-    }
+    if(!message.member.hasPermission('ADMINISTRATOR')){return message.reply(custom_embed.ToEmbedWarning("Vous n'avez pas la permissions d'utiliser cette commande !"));}
+    else if(!message.mentions.users.size) {return message.reply(custom_embed.ToEmbedWarning("Aucun utilisateur n'as été mentionner"));}
+    else if(!args[1] && args[0]!==message.mentions.users.first()){return message.reply(custom_embed.ToEmbedWarning("Aucun jeu mentionné !"));}
 
-    let taggedUser=message.author;
-    let arg_jeu;
-
-    if(message.mentions.users.size) {
-      if(args[1]){arg_jeu=args[1];}
-      taggedUser=message.mentions.users.first();
-    }else{
-      if(args[0]){arg_jeu=args[0];}
-    }
-
+    let taggedUser=message.mentions.users.first();
+    arg_jeu=args[1];
     let reply;
     if(custom_score.removeScore(taggedUser,arg_jeu)){
       if(arg_jeu==="all"){reply=`Tout vos scores ont bien été supprimer !`;}

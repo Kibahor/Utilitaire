@@ -1,0 +1,2 @@
+Utilitaire = https://discord.com/oauth2/authorize?client_id=813742071567351849&scope=bot&permissions=8
+Utilitaire_test = https://discord.com/oauth2/authorize?client_id=813743034662649868&scope=bot&permissions=8

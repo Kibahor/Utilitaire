@@ -18,32 +18,32 @@ module.exports = {
     let taggedUser = message.author;
     if (message.mentions.users.size) {taggedUser=message.mentions.users.first();}
 
-    if(custom_file.IsFileExist(`commands/moderation/warn/${taggedUser.username}.json`)===true){
-      let listwarn = custom_file.loadJSON(`commands/moderation/warn/${taggedUser.username}.json`)
-      let raison="";
-      let date="";
-      let i;
-
-      if(listwarn.infraction.length>5){i=listwarn.infraction.length-5;}
-      else{i=0;}
-
-      for(i;i<listwarn.infraction.length;i++){
-        raison+=`*${listwarn.infraction[i].raison}*\n`;
-        date+=`${listwarn.infraction[i].date}\n`;
-
-        if(listwarn.infraction[i].raison.length>=41){
-          let nbChar=listwarn.infraction[i].raison.length;
-          for(let i=1;i<(nbChar/41);i++){date+='\n'}
-        }
-
+    function search_user_by_id(id,listwarn){
+      for(let i=0;i<listwarn.userlist.length;i++){
+        if(listwarn.userlist[i].user === id){return i;}
       }
+      return null;
+    }
+
+    if(custom_file.IsFileExist(`commands/moderation/warn/listwarn.json`)===true){
+      let listwarn = custom_file.loadJSON(`commands/moderation/warn/listwarn.json`);
+      let user_index=search_user_by_id(taggedUser.id,listwarn);
+      let reply="";
+      let user;
+      let j;
+
+      if(user_index===null){return custom_embed.ToEmbedWarning(`user ${id} n'as pas été trouvé !`);}
+
+      if(listwarn.userlist[user_index].infraction.length<=5){j=0;}
+      else{j=listwarn.userlist[user_index].infraction.length-6;}
+      for(let i=listwarn.userlist[user_index].infraction.length-1;i>j;i--){
+        reply+=`**[${i}] [${listwarn.userlist[user_index].infraction[i].date}] [<@${listwarn.userlist[user_index].infraction[i].from}>]**\n*${listwarn.userlist[user_index].infraction[i].raison}*\n\n`;
+      }
+
       const MsgEmbed = new Discord.MessageEmbed()
         .setThumbnail(taggedUser.displayAvatarURL({ format: "png", dynamic: false }))
         .setTitle('Liste des Warns')
-        .addFields(
-      		{ name: 'Date', value: `${date}`, inline: true },
-      		{ name: 'Raison', value: `${raison}`, inline: true }
-        )
+        .setDescription(reply)
         .setColor(blue)
         .setTimestamp()
         .setFooter("C'est pas bien d'être méchant - Naruto")

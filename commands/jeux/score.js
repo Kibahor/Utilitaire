@@ -6,47 +6,12 @@ module.exports = {
   args: false,
 
   execute(message,args,client){
-    const fs = require('fs');
     const Discord= require('discord.js')
 
-    const custom_file = require('../../MyModule/file');
+    const custom_file = require('../../MyModule/file.js');
     const custom_embed = require('../../MyModule/embed.js');
+    const custom_score = require('../../MyModule/score.js');
     const {blue}=require('../../config.json');
-
-    //[à modifier] Peut-être faire une fonction embed pour regrouper
-    function showAllScore(taggedUser,footer){
-      let listscore = custom_file.loadJSON(`commands/jeux/score/${taggedUser.username}.json`);
-      let reply="";
-      for(let i=0;i<listscore.jeux.length;i++){reply+=`**${listscore.jeux[i].nom}** : ${listscore.jeux[i].score}\n`}
-      const MsgEmbed = new Discord.MessageEmbed()
-        .setThumbnail(taggedUser.displayAvatarURL({ format: "png", dynamic: false }))
-        .setTitle('Liste des Scores')
-        .setDescription(reply)
-        .setColor(blue)
-        .setFooter(footer)
-
-      return message.channel.send(MsgEmbed);
-    }
-
-    function showOneScore(taggedUser,nom_jeu,footer){
-      let listscore = custom_file.loadJSON(`commands/jeux/score/${taggedUser.username}.json`);
-      indice=0;
-      //[à modifier] faire appel à la fonction de recherche
-      for(let i;i<listscore.jeux.length;i++){ //Cherche l'indice d'un jeu
-        if(listscore.jeux[i].nom===nom_jeu){break;}
-        indice++;
-      }
-      let reply=`**${listscore.jeux[indice].nom}** : ${listscore.jeux[indice].score}\n`;//[à modifier] Afficher le score avec les emoji chiffre
-
-      const MsgEmbed = new Discord.MessageEmbed()
-        .setThumbnail(taggedUser.displayAvatarURL({ format: "png", dynamic: false }))
-        .setTitle(`Score de \`${nom_jeu}\``)
-        .setDescription(reply)
-        .setColor(blue)
-        .setFooter(footer)
-
-      return message.channel.send(MsgEmbed);
-    }
 
     let taggedUser=message.author;
     let arg_jeu="all";
@@ -67,12 +32,13 @@ module.exports = {
     if(taggedUser.id==="807667723151605822"){footer="Comment sa j'ai tricher 🙄";}//Le bot à un score innateignable !
     else{footer="Nous avons en fasse un grand *G@M3R* !";}
 
+    const Score=custom_file.loadJSON('commands/jeux/score/score.json');
     //Vérifie que le fichier exite
-    if(custom_file.IsFileExist(`commands/jeux/score/${taggedUser.username}.json`)===true){
+    if(custom_file.IsFileExist(`commands/jeux/score/score.json`)===true && custom_score.indiceUser(Score,taggedUser.id)!=null){
       //Si all on affiche tout les scores
-      if(arg_jeu==="all"){showAllScore(taggedUser,footer);}
+      if(arg_jeu==="all"){return message.channel.send(custom_score.showAllScore(taggedUser,footer));}
       //Sinon on affiche le score que d'un seul jeu
-      else{showOneScore(taggedUser,arg_jeu,footer);}
+      else{message.channel.send(custom_score.showOneScore(taggedUser,arg_jeu,footer));}
     //Si le fichier n'existe pas et c'est que l'utilisateur n'as pas de score !
     }else{
       const MsgEmbed = new Discord.MessageEmbed()

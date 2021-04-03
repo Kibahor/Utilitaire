@@ -1,5 +1,7 @@
 const custom_file=require('./file.js');
 const chalk = require('chalk');
+const Discord= require('discord.js');
+const {blue}=require('../config.json');
 
 //Score.js
 
@@ -9,21 +11,26 @@ const chalk = require('chalk');
 
 let setScore= function (taggedUser,nom_jeu,score){
 
-  const path=`commands/jeux/score/${taggedUser.username}.json`;
-  let userScore=custom_file.loadJSON(path);
-  if(userScore==null){
+  const path=`commands/jeux/score/score.json`;
+  let Score=custom_file.loadJSON(path);
+  if(Score===null){
     registerNewScoreFile(taggedUser,nom_jeu,score);
+    return;
   }else{
-    let indice=indiceJeux(userScore,nom_jeu); //cherche l'indice du jeux
-    if(indice==null){ //si le jeu n'existe pas on le rajoute
-      userScore.jeux.push({"nom":nom_jeu, "score":score}); //ajoute le score du jeu
+    let indice_user=indiceUser(Score,taggedUser.id); //cherche l'indice de l'utilisateur
+    if(indice_user === null){registerNewUser(Score,taggedUser,nom_jeu,score);return;}
+    let indice_jeux=indiceJeux(Score,indice_user,nom_jeu); //cherche l'indice du jeux
+    if(indiceJeux===null){ //si le jeu n'existe pas on le rajoute
+      Score.userlist[indice_user].jeux.push({"nom":nom_jeu, "score":score}); //ajoute le score du jeu
+      custom_file.registerJSON(path,Score);//on enregistre le fichier
+      return;
     }else{
-      let previousScore=userScore.jeux[indice].score; //récupère le score(string) du fichier
-      if(previousScore.includes("-")){let newScore=-(parseInt(previousScore))+(score);}//si le score est négatif on ajoute un "-" car le parseInt ne récupére pas le "-"
-      let newScore=parseInt(previousScore)+(score);
-      userScore.jeux[indice].score=newScore.toString(); //On reconvertit le score(int) en score (string)
-      custom_file.registerJSON(path,userScore);//on enregistre le fichier
-      console.log(chalk.yellow(`[JEUX] [Score ${nom_jeu}] ./commands/jeux/score/${taggedUser.username}.json à été modifié`));
+      let newScore;
+      let previousScore=Score.userlist[indice_user].jeux[indice_jeux].score; //récupère le score(string) du fichier
+      if(previousScore.includes("-")){newScore=-(parseInt(previousScore))+(score);}//si le score est négatif on ajoute un "-" car le parseInt ne récupére pas le "-"
+      else{newScore=parseInt(previousScore)+(score);}
+      Score.userlist[indice_user].jeux[indice_jeux].score=newScore.toString(); //On reconvertit le score(int) en score (string)
+      custom_file.registerJSON(path,Score);//on enregistre le fichier
     }
   }
 };
@@ -37,26 +44,20 @@ module.exports.setScore= setScore //On l'export pour pouvoir l'utiliser dans d'a
 // DESCRIPTION : [Admin Only] Supprime le score d'un jeu ou de tout les jeux
 
 let removeScore=function (taggedUser,nom_jeux){
-  const path=`commands/jeux/score/${taggedUser.username}.json`;
-  if(nom_jeux==="all"){ //Si supprimer tout les scores (all), sa revient à supprimer le fichier
-
-    return custom_file.deleteFile(path); //On vérifie que le fichier à bien été supprimer
-
+  const path=`commands/jeux/score/score.json`;
+  let Score=custom_file.loadJSON(path); //Charge le fichier des scores
+  if(Score===null){return false;}
+  let indice_user=indiceUser(Score,taggedUser.id); //cherche l'indice de l'utilisateur
+  if(indice_user === null){return false;}
+  if(nom_jeux==="all"){
+    Score.userlist.splice(indice_user, 1);
   }else{ //Sinon on charge le fichier score et on supprime le score du jeu
-
-    let userScore=custom_file.loadJSON(path); //Charge le fichier des scores
-
-    let indice=indiceJeux(userScore,nom_jeux); //Cherche l'indice du jeux concerner
-    if(indice==null){return false;} //Le jeu n'as pas été trouvé | Echec de la suppression du score
-
-    if(userScore.jeux.length==1){ //Si le fichier ne contient qu'un seul score
-      return custom_file.deleteFile(path);
-    }
-
-    delete userScore.jeux[indice]; //On supprime le score
-    //console.log(chalk.yellow(`[JEUX] [Score ${nom_jeu}] ./commands/jeux/score/${taggedUser.username}.json à été modifié`));
-    return custom_file.registerJSON(path,userScore); //On réenregistre le fichier
+    let indice_jeux=indiceJeux(Score,indice_user,nom_jeux); //cherche l'indice du jeux
+    if(indice_jeux===null){return false;} //Le jeu n'as pas été trouvé | Echec de la suppression du score
+    else if(Score.userlist[indice_user].jeux.length==1){Score.userlist.splice(indice_user, 1);} //Si le fichier ne contient qu'un seul score
+    else{Score.userlist[indice_user].jeux.splice(indice_jeux, 1);} //On supprime le score
   }
+  return custom_file.registerJSON(path,Score); //On réenregistre le fichier
 };
 
 module.exports.removeScore= removeScore //On l'export pour pouvoir l'utiliser dans d'autre programme
@@ -68,14 +69,21 @@ module.exports.removeScore= removeScore //On l'export pour pouvoir l'utiliser da
 // DESCRIPTION : Créé un fichier de score pour un utilisateur donner
 
 let registerNewScoreFile=function (taggedUser,nom_jeu,score){
-  const path=`commands/jeux/score/${taggedUser.username}.json`;
-  let user = {"user": taggedUser.username,
-              "jeux":[
-                {"nom":nom_jeu, "score":score.toString()}
-              ]
-            };
+  const path=`commands/jeux/score/score.json`;
+  let user = {"userlist":[{"user": taggedUser.id,"jeux":[{"nom":nom_jeu, "score":score.toString()}]}]}
   custom_file.registerJSON(path,user);
-  console.log(chalk.yellow(`[JEUX] ${path} à bien été créé !`));
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NOM : registerNewUser()
+// DESCRIPTION : Créé un fichier de score pour un utilisateur donner
+
+let registerNewUser=function (Score,taggedUser,nom_jeu,score){
+  const path=`commands/jeux/score/score.json`;
+  let user = {"user": taggedUser.id,"jeux":[{"nom":nom_jeu, "score":score.toString()}]}
+  Score.userlist.push(user);
+  custom_file.registerJSON(path,Score);
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,16 +92,31 @@ let registerNewScoreFile=function (taggedUser,nom_jeu,score){
 // NOM : indiceJeux()
 // DESCRIPTION : Permet d'obtenir l'indice d'un jeu
 
-let indiceJeux=function (userScore,nom_jeu){
-  if(userScore==null){return null;}
-  let indice=0;
-  for(let i=0;i<userScore.jeux.length;i++){ //Parcours les jeux
-    if(userScore.jeux[i].nom===nom_jeu){return indice;} //Si le nom du jeu correspond au nom_jeu donner en paramétre on renvoie l'indice
-    indice++;
+let indiceJeux=function (Score,indice_user,nom_jeu){
+  if(Score==null){return null;}
+  let indiceJeux=0;
+  for(let i=0;i<Score.userlist[indice_user].jeux.length;i++){ //Parcours les jeux
+    if(Score.userlist[indice_user].jeux[i].nom===nom_jeu){return indiceJeux;} //Si le nom du jeu correspond au nom_jeu donner en paramétre on renvoie l'indice
+    indiceJeux++;
   }
-  //console.log(chalk.yellow("[indiceJeux] Le score n'existe pas !"));
   return null; //Le jeu n'as pas été trouver dans le fichier
 };
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+// NOM : indiceUser()
+// DESCRIPTION : Permet d'obtenir l'indice d'un utilisateur
+
+let indiceUser=function (Score,id){
+  if(Score==null){return null;}
+  let indiceUser=0;
+  for(let i=0;i<Score.userlist.length;i++){
+    if(Score.userlist[i].user===id){return indiceUser;}
+    indiceUser++;
+  }
+  return null;
+};
+module.exports.indiceUser= indiceUser //On l'export pour pouvoir l'utiliser dans d'autre programme
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -113,6 +136,46 @@ let listJeux=function(){
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+//[à modifier] Peut-être faire une fonction embed pour regrouper
+let showAllScore = function (taggedUser,footer){
+  const path=`commands/jeux/score/score.json`;
+  let Score=custom_file.loadJSON(path); //Charge le fichier des scores
+  if(Score===null){return;}
+  let indice_user=indiceUser(Score,taggedUser.id); //cherche l'indice de l'utilisateur
+  let reply="";
+
+  for(let i=0;i<Score.userlist[indice_user].jeux.length;i++){reply+=`**${Score.userlist[indice_user].jeux[i].nom}** : ${Score.userlist[indice_user].jeux[i].score}\n`}
+  const MsgEmbed = new Discord.MessageEmbed()
+    .setThumbnail(taggedUser.displayAvatarURL({ format: "png", dynamic: false }))
+    .setTitle('Liste des Scores')
+    .setDescription(reply)
+    .setColor(blue)
+    .setFooter(footer)
+
+  return MsgEmbed;
+}
+module.exports.showAllScore= showAllScore //On l'export pour pouvoir l'utiliser dans d'autre programme
+
+let showOneScore= function (taggedUser,nom_jeu,footer){
+  const path=`commands/jeux/score/score.json`;
+  let Score=custom_file.loadJSON(path); //Charge le fichier des scores
+  if(Score===null){return;}
+  let indice_user=indiceUser(Score,taggedUser.id); //cherche l'indice de l'utilisateur
+  let indice_jeux=indiceJeux(Score,indice_user,nom_jeu); //cherche l'indice du jeux
+
+  let reply=`**${Score.userlist[indice_user].jeux[indice_jeux].nom}** : ${Score.userlist[indice_user].jeux[indice_jeux].score}\n`;//[à modifier] Afficher le score avec les emoji chiffre
+
+  const MsgEmbed = new Discord.MessageEmbed()
+    .setThumbnail(taggedUser.displayAvatarURL({ format: "png", dynamic: false }))
+    .setTitle(`Score de \`${nom_jeu}\``)
+    .setDescription(reply)
+    .setColor(blue)
+    .setFooter(footer)
+
+  return message.channel.send(MsgEmbed);
+}
+module.exports.showOneScore= showOneScore //On l'export pour pouvoir l'utiliser dans d'autre programme
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 // NOM : registerNewGame()
 // DESCRIPTION : Ajoute un jeu dans le fichier jeux.json
@@ -127,7 +190,6 @@ let listJeux=function(){
   });
   listGame.jeux.push({"nom": nom_jeu});
   file.registerJSON(`./commands/jeux/score/jeux.json`,listGame);
-  console.log(chalk.yellow(`[JEUX] [Ajout d'un jeu] ./commands/jeux/score/jeux.json à bien été modifié !`));
 };
 module.exports.registerNewGame = registerNewGame
 */

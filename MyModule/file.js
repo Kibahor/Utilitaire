@@ -38,8 +38,8 @@ let registerJSON=function (PathToFilename,donnees){
       else{console.log(chalk.yellow(`[registerJSON] Le fichier : ${PathToFilename} a bien été créé`));}*/
       return true;
     }catch(error){
-      console.log(chalk.yellow(`[registerJSON] Erreur lors de l'écriture du fichier : ${PathToFilename}`));
-      console.error(error);
+      //console.log(chalk.yellow(`[registerJSON] Erreur lors de l'écriture du fichier : ${PathToFilename}`));
+      //console.error(error);
       return false;
     }
 };
@@ -56,7 +56,7 @@ let deleteFile=function(PathToFilename){
     console.log(chalk.yellow(`[deleteFile] ${PathToFilename} à bien été supprimé !`));
     return true //Le fichier existe et a bien été supprimer
   }else{
-    return false //le fichier n'existe pas
+    return false //le fichier n'existe pas et n'as pas pu être supprimer
   }
 };
 module.exports.deleteFile = deleteFile

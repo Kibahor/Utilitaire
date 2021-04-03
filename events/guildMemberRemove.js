@@ -1,7 +1,6 @@
-const custom = require('../myfunction.js');
 const chalk = require('chalk');
 
-module.exports= (client) =>{
+module.exports= (client,Discord,member) =>{
       console.log(chalk.red(`[INFO] ${member.displayName} à quitter le serveur`));
       const MsgEmbed = new Discord.MessageEmbed()
         .setTitle(`${member.displayName} à quitter le serveur !`)

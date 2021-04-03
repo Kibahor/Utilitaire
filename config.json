@@ -1,4 +1,6 @@
 {
 	"prefix": "+",
-	"token": "Nope"
+	"token": "nope",
+	"blue": "#3e77f5",
+	"red": "#c40c0c"
 }

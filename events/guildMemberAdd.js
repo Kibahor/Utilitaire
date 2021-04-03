@@ -1,7 +1,6 @@
-const custom = require('../myfunction.js');
 const chalk = require('chalk');
 
-module.exports= (client,Discord) =>{
+module.exports= (client,Discord,member) =>{
       console.log(chalk.cyan(`[INFO] ${member.displayName} à rejoint le serveur`));
       const MsgEmbed = new Discord.MessageEmbed()
         .setTitle(`Bienvenue sur notre magnifique serveur ${member.displayName} !`)

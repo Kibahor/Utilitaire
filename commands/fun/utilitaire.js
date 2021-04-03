@@ -1,14 +1,17 @@
 module.exports = {
   name:'utilitaire',
   aliases: 'util',
+  category:'Fun',
   description: 'Affiche une phrase parmis une liste de phrase prédifinie',
   usage: '+utilitaire',
   args: false,
   execute(message){
     const Discord = require('discord.js');
+    const {blue}= require('../../config.json');
+
     const NBMESSAGE=26;
-    let phrase='';
-    let image='';
+    let phrase,image='';
+
     switch(Math.floor((Math.random() * NBMESSAGE) + 1)) {
       case 1: phrase="Fuck <@339780915196592129>"; break;
       case 2: phrase="<@350147522032828418> Votre insignifiance m'étonnes"; break;
@@ -41,7 +44,7 @@ module.exports = {
     MsgEmbed = new Discord.MessageEmbed()
       .setTitle("Utilitaire")
       .setDescription(phrase)
-      .setColor('#3669d9')
+      .setColor(blue)
       .setTimestamp()
       .setImage(image)
       .setFooter('Error 404')

@@ -27,60 +27,32 @@ module.exports = {
         }
       }*/
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      let A="<:regional_indicator_a:836273768782495786> "
-      let C="<:regional_indicator_c:836273669130551317> "
-      let E="<:regional_indicator_e:836274991129428018> "
-      let I="<:regional_indicator_i:836247466775937075> "
-      let O="<:o2:836273911729487873> "
-      let T="<:regional_indicator_t:836242151708688464> "
-      let X="<:regional_indicator_x:836280115234734120>"
 
-      let One="<:one:836277380905041962>"
-      let Two="<:two:836277613924319323>"
-      let Three="<:three:836277765124784178>"
-      let Four="<:four:836277842865946656>"
-      let Five="<:five:836277974579150918>"
-      let Six="<:six:836278127915040838>"
-      let Seven="<:seven:836278371452452894>"
-      let Eight="<:eight:836278557432217651>"
-      let Nine="<:nine:836278671165227080>"
+    let letter={A:"🇦 ", C:"🇨 ", E:"🇪 ", I:"🇮 ", O:"🅾️ " ,T:"🇹 ", X:"🇽 "};
+    let number=new Array("1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣");
 
-      title=T+I+C+"  "+T+A+C+"  "+T+O+E+"\n\n"
+    function create_msg(number){
+      let msg=letter.T+letter.I+letter.C+"  "+letter.T+letter.A+letter.C+"  "+letter.T+letter.O+letter.E+"\n\n"
+      for(let i=0;i<9;i=i+3){
+        msg+=`              ${number[i]}   ‖   ${number[i+1]}   ‖   ${number[i+2]}\n`
+        msg+="              =============\n"
+      }
+      msg=msg.slice(0,-14)//enlève la barre de séparation en trop
+      msg+="\n<:arrow_down:836284510000775228> Choisi ta case"
+      return msg;
+    }
 
-      transition="              "+"=============\n"
-      ligne1="              "+One+"   "+"‖"+"   "+Two+"   "+"‖"+"   "+Three+"\n"
-      ligne2="              "+Four+"   "+"‖"+"   "+Five+"   "+"‖"+"   "+Six+"\n"
-      ligne3="              "+Seven+"   "+"‖"+"   "+Eight+"   "+"‖"+"   "+Nine+"\n"
-
-      end_msg="\n<:arrow_down:836284510000775228>"+" Choisi ta case"
-      grille=ligne1+transition+ligne2+transition+ligne3
-      message.channel.send(title + grille+end_msg).then(sentMessage => {
-        sentMessage.react("1️⃣")/*
-        sentMessage.react("2️⃣")
-        sentMessage.react("3️⃣")
-        sentMessage.react("4️⃣")
-        sentMessage.react("5️⃣")
-        sentMessage.react("6️⃣")
-        sentMessage.react("7️⃣")
-        sentMessage.react("8️⃣")
-        sentMessage.react("9️⃣")*/
-
-        //https://stackoverflow.com/questions/57452056/discord-js-how-to-send-a-message-and-collect-reactions-from-it
-        //https://discordjs.guide/popular-topics/collectors.html#await-reactions
-
-        const time = 60000 //amount of time to collect for in milliseconds
-
-        async function (message) {
-          await message.react("1️⃣")
-          const filter = (reaction, user) => {
-              return reaction.emoji.name === "1️⃣" && user.id === message.author.id
-          };
-          const collector = message.createReactionCollector(filter, { time: time });
-              collector.on('collect', (reaction, reactionCollector) => {
-                   //do stuff
-              });
-         });
-
+    message.channel.send(create_msg(number))
+      .then(sentMessage => {
+        for(let nb of number){
+          sentMessage.react(nb);
+        }
+        sentMessage.react
+        const filter = (reaction, user) => number.includes(reaction.emoji.name)&& user.id === message.author.id;
+        const collector = sentMessage.createReactionCollector(filter, { time: 15000 });
+        collector.on('collect', async (reaction, user) => {
+          console.log(`Collect reaction ${reaction.emoji.name} from ${user.tag}`)
+        });
       });
   }
 }

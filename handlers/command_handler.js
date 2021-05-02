@@ -2,6 +2,7 @@ const fs = require('fs');
 const chalk = require('chalk');
 
 module.exports = (client,Discord) =>{
+
 		let nbcommandes=0;
 		const commandFolders = fs.readdirSync('./commands');
 		for (const folder of commandFolders) {

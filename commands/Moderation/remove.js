@@ -4,7 +4,7 @@ module.exports = {
   category:'Modération',
   description: '[Admin Only] Permet de supprimer toute sorte de chose',
   usage: "+remove <score|warn|demande|bug> ...",
-  usage2: "+remove score <id|@user> nom du jeu\n+remove warn <id|@user> numéro\n+remove <demande|bug> numéro",
+  usage2: "+remove score <id|@user> nom du jeu\n+remove warn <id|@user> numéro\n+remove <demande|bug> <numéro|all>",
   permission: 'ADMINISTRATOR',
   args: true,
   execute (message,args,client){
@@ -139,21 +139,29 @@ module.exports = {
         /*Vérifier les arguments*/
         if(!args[1]){
           return message.channel.send(custom_embed.ToEmbedWarning("Veuillez mettre le numéro du "+args[0]));
-        }else if(isNaN(args[1])){ //On vérifie que c'est bien un nombre
+        }else if(isNaN(args[1]) && args[1]!="all"){ //On vérifie que c'est bien un nombre
           return message.channel.send(custom_embed.ToEmbedWarning(`\`${args[1]}\` n'est pas un numéro`));
         }else if(listreport==null){
           return message.channel.send(custom_embed.ToEmbedWarning("Impossible d'enlever le "+args[0]+" car le serveur ne contient aucun "+args[0]));
         }
 
         if(args[0]=="bug"){
-          listreport.bug.splice(args[2],1);
+          if(args[1]=="all"){
+            listreport.bug.splice(0,listreport.bug.length);
+          }else{
+            listreport.bug.splice(args[1],1);
+          }
           if(custom_file.registerJSON(path,listreport)){
             return message.channel.send(custom_embed.ToEmbed("Le bug a été supprimer"))
           }else{
             return message.channel.send(custom_embed.ToEmbed("Une erreur est survenue lors de la suppression du bug"));
           }
         }else{
-          listreport.demande.splice(args[2],1);
+          if(args[1]=="all"){
+            listreport.demande.splice(0,listreport.demande.length);
+          }else{
+            listreport.demande.splice(args[1],1);
+          }
           if(custom_file.registerJSON(path,listreport)){
             return message.channel.send(custom_embed.ToEmbed("La demande a été supprimer"))
           }else{

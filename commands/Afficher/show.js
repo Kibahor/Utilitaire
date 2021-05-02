@@ -202,7 +202,7 @@ module.exports = {
 
           if(listreport===null){
             title='Liste des Reports';
-            reply="La liste est vide !";
+            reply="\n*La liste est vide !*";
             footer="Attention à ne pas flood les Reports";
 
           }else if(args[0]==="report"){
@@ -242,7 +242,7 @@ module.exports = {
           let demande_size=listreport.demande.length;
 
           if(demande_size===0){
-            return "La liste des demandes est vide";
+            return "\n*La liste des demandes est vide*";
           }else if(demande_size===1){
             return `\n**N°0** | ${listreport.demande[0].date} ${listreport.demande[0].heure} | <@${listreport.demande[0].from}>\n${listreport.demande[0].texte}\n`;
           }else if(demande_size<=5){
@@ -265,7 +265,7 @@ module.exports = {
           let bug_size=listreport.bug.length;
 
           if(bug_size===0){
-            return "La liste des bugs est vide";
+            return "\n*La liste des bugs est vide*";
           }else if(bug_size===1){
             return `\n**N°0** | ${listreport.bug[0].date} ${listreport.bug[0].heure} | <@${listreport.bug[0].from}>\n${listreport.bug[0].texte}\n`;
           }else if(bug_size<=5){

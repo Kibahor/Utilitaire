@@ -16,11 +16,20 @@ module.exports = {
       if (!command) {
         return message.channel.send(custom_embed.ToEmbedWarning(`Commande : \`${args[0]}\` introuvable`));
       }else{
-        if(command.usage2){
-          return message.channel.send(custom_embed.ToEmbed1(`**${command.name.charAt(0).toUpperCase() + command.name.slice(1)}**`,`❯ **Alias**\n\`${command.name}\` \`${command.aliases}\`\n\n❯ **Syntax**\n\`${command.usage2}\`\n\n❯ **Description**\n${command.description}`));
-        }else{
-          return message.channel.send(custom_embed.ToEmbed1(`**${command.name.charAt(0).toUpperCase() + command.name.slice(1)}**`,`❯ **Alias**\n\`${command.name}\` \`${command.aliases}\`\n\n❯ **Syntax**\n\`${command.usage}\`\n\n❯ **Description**\n${command.description}`));
+        let title=`**${command.name.charAt(0).toUpperCase() + command.name.slice(1)}**`
+        let body=`❯ **Alias**\n\`${command.name}\``
+
+        for(let i=0;i<command.aliases.length;i++){
+          body+=` \`${command.aliases[i]}\``
         }
+
+        if(command.usage2){
+          body+=`\n\n❯ **Syntax**\n\`${command.usage2}\``
+        }else{
+          body+=`\n\n❯ **Syntax**\n\`${command.usage}\`\n\n❯ **Description**\n${command.description}`
+        }
+
+        return message.channel.send(custom_embed.ToEmbed1(title,body));
       }
     }else{
 

@@ -63,12 +63,10 @@ module.exports = {
           sentMessage.react(nb);
         }
 
-        const filter = (reaction, user) => (number.includes(reaction.emoji.name) || reaction.emoji.name===letter.X2) && user.id !== sentMessage.author.id;
+        const filter = (reaction, user) => (user.id === message.author.id || user.id === taggedUser.id);
         const collector = sentMessage.createReactionCollector(filter,{ time: 300000 });//5 min et s'arrête
 
         collector.on('collect',async (reaction, user) => {
-            if(user.id != player.id){return}
-            tour++
             function isVictory(player){
               /*Toute les possibilités
               ["🅾️","🅾️","🅾️","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"]
@@ -104,8 +102,8 @@ module.exports = {
               let msg=`⛔ **Partie Annulé par** <@${user.id}>`
               return GameOver(msg)
 
-            }else{
-
+            }else if(user.id === player.id){
+                tour++
                 let index=modified_number.indexOf(reaction.emoji.name);
 
                 if(player.id===message.author.id){//Change le joueur
@@ -122,13 +120,13 @@ module.exports = {
                   let msg="🏁 **Partie Terminé :** Égalité"
                   return GameOver(msg)
                 }else if(isVictory(player)){
-                  custom_score.setScore(player,"morpions",-1);
+                  //custom_score.setScore(player,"morpions",-1);
 
                   //Inverse le joueur
                   if(player.id===message.author.id){player=taggedUser}
                   else{player=message.author}
 
-                  custom_score.setScore(player,"morpions",1);
+                  //custom_score.setScore(player,"morpions",1);
 
                   let msg=`🏁 **Partie Terminé :** 👑 <@${player.id}>`
                   return GameOver(msg)

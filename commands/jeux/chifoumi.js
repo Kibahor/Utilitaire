@@ -33,15 +33,13 @@ module.exports = {
       let reply=`**[${arg} | ${answer}]**`;
 
       if(answer===arg){reply+="\tÉgalité !";}
-
-      else if(arg==="pierre"  && answer==="ciseaux"){reply+=perdu;custom_score.setScore(message.author,nom_jeu,1);}
-      else if(arg==="feuille"  && answer==="pierre"){reply+=perdu;custom_score.setScore(message.author,nom_jeu,1);}
-      else if(arg==="ciseaux" && answer==="feuille"){reply+=perdu;custom_score.setScore(message.author,nom_jeu,1);}
-
-      else if(answer==="pierre" && arg==="ciseaux"){reply+=gagner;custom_score.setScore(message.author,nom_jeu,-1);}
-      else if(answer==="feuille" && arg==="pierre"){reply+=gagner;custom_score.setScore(message.author,nom_jeu,-1);}
-      else if(answer==="ciseaux"&& arg==="feuille"){reply+=gagner;custom_score.setScore(message.author,nom_jeu,-1);}
-
+      else if((arg==="pierre" && answer==="ciseaux") || (arg==="feuille"  && answer==="pierre") || (arg==="ciseaux" && answer==="feuille")){
+        reply+=perdu;
+        //custom_score.setScore(message.author,nom_jeu,1);
+      }else{
+        reply+=gagner;
+        //custom_score.setScore(message.author,nom_jeu,-1);
+      }
 
       return message.channel.send(custom_embed.ToEmbed1("Chifoumi",reply));
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -122,9 +122,13 @@ module.exports = {
                   let msg="🏁 **Partie Terminé :** Égalité"
                   return GameOver(msg)
                 }else if(isVictory(player)){
+                  custom_score.setScore(player,"morpions",-1);
+
                   //Inverse le joueur
                   if(player.id===message.author.id){player=taggedUser}
                   else{player=message.author}
+
+                  custom_score.setScore(player,"morpions",1);
 
                   let msg=`🏁 **Partie Terminé :** 👑 <@${player.id}>`
                   return GameOver(msg)

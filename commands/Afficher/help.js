@@ -28,7 +28,6 @@ module.exports = {
         }else{
           body+=`\n\n❯ **Syntax**\n\`${command.usage}\`\n\n❯ **Description**\n${command.description}`
         }
-        body+=`\n\n❯ **Description**\n${command.description}`
 
         return message.channel.send(custom_embed.ToEmbed1(title,body));
       }

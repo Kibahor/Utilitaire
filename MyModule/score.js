@@ -23,6 +23,7 @@ let setScore= function (taggedUser,nom_jeu,score){
     let indice_jeux=indiceJeux(Score,indice_user,nom_jeu); //cherche l'indice du jeux
 
     if(indiceJeux===null){ //si le jeu n'existe pas on le rajoute
+      if(score<0){score=0}
       Score.userlist[indice_user].jeux.push({"nom":nom_jeu, "score":score}); //ajoute le score du jeu
       custom_file.registerJSON(path,Score);//on enregistre le fichier
       return;
@@ -31,7 +32,7 @@ let setScore= function (taggedUser,nom_jeu,score){
 
       let newScore;
       let previousScore=parseInt(Score.userlist[indice_user].jeux[indice_jeux].score); //récupère le score(string) du fichier
-      if((previousScore+score)<0 || previousScore<0){newScore=0;}
+      if((previousScore+score)<0 || previousScore<0){newScore=0;}//Pour corriger les scores négatif déjà existant
       else{newScore=previousScore+score;}
       Score.userlist[indice_user].jeux[indice_jeux].score=newScore.toString(); //On reconvertit le score(int) en score (string)
       custom_file.registerJSON(path,Score);//on enregistre le fichier
@@ -73,6 +74,7 @@ module.exports.removeScore= removeScore //On l'export pour pouvoir l'utiliser da
 // DESCRIPTION : Créé un fichier de score pour un utilisateur donner
 
 let registerNewScoreFile=function (taggedUser,nom_jeu,score){
+  if(score<0){score=0}
   let user = {"userlist":[{"user": taggedUser.id,"jeux":[{"nom":nom_jeu, "score":score.toString()}]}]}
   custom_file.registerJSON(path,user);
 };
@@ -83,6 +85,7 @@ let registerNewScoreFile=function (taggedUser,nom_jeu,score){
 // DESCRIPTION : Créé un fichier de score pour un utilisateur donner
 
 let registerNewUser=function (Score,taggedUser,nom_jeu,score){
+  if(score<0){score=0}
   let user = {"user": taggedUser.id,"jeux":[{"nom":nom_jeu, "score":score.toString()}]}
   Score.userlist.push(user);
   custom_file.registerJSON(path,Score);

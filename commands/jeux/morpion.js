@@ -2,7 +2,7 @@ module.exports = {
   name:'morpions',
   aliases: ['mp','tictactoe','ttt'],
   category:'Jeux',
-  description: 'Permet de jouer à Tic Tac Toe ou Morpions comme un bon français le dirais',
+  description: 'Permet de jouer à Tic Tac Toe ou Morpions comme un bon français le dirais\n⚠️Attention au bout de 5 min la partie est arrêté',
   usage: '+morpion @player2',
   args: true,
 

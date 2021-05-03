@@ -29,8 +29,8 @@ module.exports = {
     let number=["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"];
     let modified_number=number
     let player;
-    let XorO_letter;
-    let tour=0;
+    let actual_letter;
+    let tour=1;
 
     function create_msg(number,end_msg){
       let msg=letter.T+letter.I+letter.C+"⬛"+letter.T+letter.A+letter.C+"⬛"+letter.T+letter.O+letter.E+"\n\n"
@@ -53,10 +53,10 @@ module.exports = {
       ["🅾️","2️⃣","3️⃣","4️⃣","🅾️","6️⃣","7️⃣","8️⃣","🅾️"]
       ["1️⃣","2️⃣","🅾️","4️⃣","🅾️","6️⃣","🅾️","8️⃣","9️⃣"]
       ["🅾️","2️⃣","3️⃣","🅾️","5️⃣","6️⃣","🅾️","8️⃣","9️⃣"]*/
-
+      /*
       if(player.id===message.author.id){actual_letter=letter.O2}
       else{actual_letter=letter.X}
-
+      */
       function testPossibility(case1,case2,case3){
         return (modified_number[case1-1] === actual_letter &&
                 modified_number[case2-1] === actual_letter &&
@@ -78,68 +78,63 @@ module.exports = {
     switch(Math.round(Math.random())){
       case 0:
         player=message.author
-        XorO_letter=letter.X
+        actual_letter=letter.X
         break;
       case 1:
         player=taggedUser
-        XorO_letter=letter.O2
+        actual_letter=letter.O2
         break;
     }
 
-    message.channel.send(create_msg(number,`\n${XorO_letter} **Choisi ta case**  <@${player.id}> `))
+    message.channel.send(create_msg(number,`\n${actual_letter} **Choisi ta case**  <@${player.id}> `))
       .then(sentMessage => {
 
+        /*Envoie les réactions*/
         sentMessage.react(letter.X2);
         for(let nb of number){
           sentMessage.react(nb);
         }
 
-        const filter = (reaction, user) => (user.id === message.author.id || user.id === taggedUser.id);
+        /*Création du collecteur*/
+        const filter = (reaction, user) => (user.id === message.author.id || user.id === taggedUser.id);//Seul les deux joueurs active le collecteur
         const collector = sentMessage.createReactionCollector(filter,{ time: 300000 });//5 min et s'arrête
 
         collector.on('collect',async (reaction, user) => {
+
             function GameOver(msg){
               sentMessage.reactions.removeAll()
               sentMessage.edit(create_msg(modified_number,msg))
-              return collector.stop(); // Delete the collector.
+              return collector.stop();
             }
 
             if(reaction.emoji.name === letter.X2){
               return GameOver(sentMessage,`⛔ **Partie Annulé par** <@${user.id}>`)
-
             }else if(user.id === player.id){
-                tour++
                 let index=modified_number.indexOf(reaction.emoji.name);
 
-                if(player.id===message.author.id){//Change le joueur
+                /*Change le joueur*/
+                if(player.id===message.author.id){
                   modified_number[index]=letter.X
                   player=taggedUser
-                  XorO_letter=letter.O2
+                  actual_letter=letter.O2
                 }else{
                   modified_number[index]=letter.O2
                   player=message.author
-                  XorO_letter=letter.X
+                  actual_letter=letter.X
                 }
 
+                /*Déroulement de la partie*/
                 if(tour==9){ //Partie Terminé
-                  return GameOver(sentMessage,"🏁 **Partie Terminé :** Égalité")
-
-                }else if(isVictory(player)){
-                  //custom_score.setScore(player,"morpions",-1);
-
-                  //Inverse le joueur
-                  if(player.id===message.author.id){player=taggedUser}
-                  else{player=message.author}
-
+                  return GameOver("🏁 **Partie Terminé :** Égalité")
+                }else if(isVictory(player)){ //Partie Gagné
                   //custom_score.setScore(player,"morpions",1);
-
-                  let msg=`🏁 **Partie Terminé :** 👑 <@${player.id}>`
-                  return GameOver(sentMessage,msg)
-                }else{
-                  let msg=`\n${XorO_letter} **Choisi ta case** <@${player.id}> `
-                  sentMessage.edit(create_msg(modified_number,msg))
+                  return GameOver(`🏁 **Partie Terminé :** 👑 <@${player.id}>`)
+                }else{ //Passe au prochain tour
+                  sentMessage.edit(create_msg(modified_number,`\n${actual_letter} **Choisi ta case** <@${player.id}> `))
                   await reaction.remove()
                 }
+
+                tour++
               }
         })
 

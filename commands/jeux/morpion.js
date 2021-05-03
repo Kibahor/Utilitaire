@@ -43,6 +43,37 @@ module.exports = {
       return custom_embed.ToEmbed(msg);
     }
 
+    function isVictory(player){
+      /*Toute les possibilités
+      ["🅾️","🅾️","🅾️","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"]
+      ["1️⃣","2️⃣","3️⃣","🅾️","🅾️","🅾️","7️⃣","8️⃣","9️⃣"]
+      ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","🅾️","🅾️","🅾️"]
+      ["1️⃣","🅾️","3️⃣","4️⃣","🅾️","6️⃣","7️⃣","🅾️","9️⃣"]
+      ["1️⃣","2️⃣","🅾️","4️⃣","5️⃣","🅾️","7️⃣","8️⃣","🅾️"]
+      ["🅾️","2️⃣","3️⃣","4️⃣","🅾️","6️⃣","7️⃣","8️⃣","🅾️"]
+      ["1️⃣","2️⃣","🅾️","4️⃣","🅾️","6️⃣","🅾️","8️⃣","9️⃣"]
+      ["🅾️","2️⃣","3️⃣","🅾️","5️⃣","6️⃣","🅾️","8️⃣","9️⃣"]*/
+
+      if(player.id===message.author.id){actual_letter=letter.O2}
+      else{actual_letter=letter.X}
+
+      function testPossibility(case1,case2,case3){
+        return (modified_number[case1-1] === actual_letter &&
+                modified_number[case2-1] === actual_letter &&
+                modified_number[case3-1] === actual_letter)
+      }
+
+      return (testPossibility(1,2,3)||
+              testPossibility(4,5,6)||
+              testPossibility(7,8,9)||
+              testPossibility(2,5,8)||
+              testPossibility(3,6,9)||
+              testPossibility(1,5,9)||
+              testPossibility(3,5,7)||
+              testPossibility(1,4,7))
+    }
+
+
     //Choisis aléatoirement le joueur
     switch(Math.round(Math.random())){
       case 0:
@@ -67,30 +98,6 @@ module.exports = {
         const collector = sentMessage.createReactionCollector(filter,{ time: 300000 });//5 min et s'arrête
 
         collector.on('collect',async (reaction, user) => {
-            function isVictory(player){
-              /*Toute les possibilités
-              ["🅾️","🅾️","🅾️","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"]
-              ["1️⃣","2️⃣","3️⃣","🅾️","🅾️","🅾️","7️⃣","8️⃣","9️⃣"]
-              ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","🅾️","🅾️","🅾️"]
-              ["1️⃣","🅾️","3️⃣","4️⃣","🅾️","6️⃣","7️⃣","🅾️","9️⃣"]
-              ["1️⃣","2️⃣","🅾️","4️⃣","5️⃣","🅾️","7️⃣","8️⃣","🅾️"]
-              ["🅾️","2️⃣","3️⃣","4️⃣","🅾️","6️⃣","7️⃣","8️⃣","🅾️"]
-              ["1️⃣","2️⃣","🅾️","4️⃣","🅾️","6️⃣","🅾️","8️⃣","9️⃣"]
-              ["🅾️","2️⃣","3️⃣","🅾️","5️⃣","6️⃣","🅾️","8️⃣","9️⃣"]*/
-
-              if(player.id===message.author.id){actual_letter=letter.O2}
-              else{actual_letter=letter.X}
-
-              return ((modified_number[0] === actual_letter && modified_number[1] === actual_letter && modified_number[2] === actual_letter)||
-              (modified_number[3] === actual_letter && modified_number[4] === actual_letter && modified_number[5] === actual_letter)||
-              (modified_number[6] === actual_letter && modified_number[7] === actual_letter && modified_number[8] === actual_letter)||
-              (modified_number[1] === actual_letter && modified_number[4] === actual_letter && modified_number[7] === actual_letter)||
-              (modified_number[2] === actual_letter && modified_number[5] === actual_letter && modified_number[8] === actual_letter)||
-              (modified_number[0] === actual_letter && modified_number[4] === actual_letter && modified_number[8] === actual_letter)||
-              (modified_number[2] === actual_letter && modified_number[4] === actual_letter && modified_number[6] === actual_letter)||
-              (modified_number[0] === actual_letter && modified_number[3] === actual_letter && modified_number[6] === actual_letter))
-            }
-
             function GameOver(msg){
               sentMessage.reactions.removeAll()
               sentMessage.edit(create_msg(modified_number,msg))
@@ -98,9 +105,7 @@ module.exports = {
             }
 
             if(reaction.emoji.name === letter.X2){
-
-              let msg=`⛔ **Partie Annulé par** <@${user.id}>`
-              return GameOver(msg)
+              return GameOver(sentMessage,`⛔ **Partie Annulé par** <@${user.id}>`)
 
             }else if(user.id === player.id){
                 tour++
@@ -117,8 +122,8 @@ module.exports = {
                 }
 
                 if(tour==9){ //Partie Terminé
-                  let msg="🏁 **Partie Terminé :** Égalité"
-                  return GameOver(msg)
+                  return GameOver(sentMessage,"🏁 **Partie Terminé :** Égalité")
+
                 }else if(isVictory(player)){
                   //custom_score.setScore(player,"morpions",-1);
 
@@ -129,7 +134,7 @@ module.exports = {
                   //custom_score.setScore(player,"morpions",1);
 
                   let msg=`🏁 **Partie Terminé :** 👑 <@${player.id}>`
-                  return GameOver(msg)
+                  return GameOver(sentMessage,msg)
                 }else{
                   let msg=`\n${XorO_letter} **Choisi ta case** <@${player.id}> `
                   sentMessage.edit(create_msg(modified_number,msg))
